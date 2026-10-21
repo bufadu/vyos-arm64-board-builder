@@ -445,7 +445,11 @@
       "kernel_version": "6.18.57"
     },
     "2026.10.21-0025-rolling": {
-      "boards": {},
+      "boards": {
+        "radxa-e52c": {
+          "dispatched": true
+        }
+      },
       "vyos_commit": "4d866b0ac68c73f89a2cf495f05a053b1b53517d",
       "kernel_version": "6.18.57"
     }
