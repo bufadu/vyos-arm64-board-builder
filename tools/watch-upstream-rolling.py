@@ -49,6 +49,9 @@ def current_source():
 
 
 def normalized_title(value):
+    # Optional profiles disabled in the standard build do not change its identity.
+    # Keep enabled or unknown profiles distinct so they cannot satisfy a base build.
+    value = re.sub(r" (?:print-e|signage-i)=false(?= |$)", "", value)
     # Older runs predate the two explicit multimedia flags.
     if value.endswith('network=true tailscale=false kvm=false'):
         return value+' kiosk-f=false receiver-g=false'

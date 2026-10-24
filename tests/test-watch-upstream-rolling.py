@@ -20,6 +20,13 @@ class Tests(unittest.TestCase):
         self.assertEqual(m.normalized_title('rock-5b / tag / network=true tailscale=false kvm=false'),m.title('rock-5b','tag'))
         self.assertEqual(m.normalized_title(m.title('rock-5b','tag')),m.title('rock-5b','tag'))
 
+    def test_current_workflow_title_normalization(self):
+        base=m.title('rock-5b','2026.10.23-0026-rolling')
+        self.assertEqual(m.normalized_title(base+' print-e=false signage-i=false'),base)
+        for extra in (' print-e=true signage-i=false', ' print-e=false signage-i=true',
+                      ' future-profile=false'):
+            self.assertNotEqual(m.normalized_title(base+extra),base)
+
     def test_orangepi_enrollment(self):
         self.assertEqual(m.BOARDS['orangepi5-plus'], 'efi-firmware-dtb')
         self.assertEqual(m.BOARD_FIRST_ROLLING['orangepi5-plus'], '2026.09.28-0746-rolling')
@@ -81,7 +88,7 @@ class Tests(unittest.TestCase):
                 return {'status':'completed','conclusion':'failure','run_attempt':1,'html_url':'https://example.test/run'}
             def gh(*args):
                 if args[:2]==('run','list'):
-                    return json.dumps([{'displayTitle':m.title(b,tag),'databaseId':i} for i,b in enumerate(m.BOARDS,1)])
+                    return json.dumps([{'displayTitle':m.title(b,tag)+' print-e=false signage-i=false','databaseId':i} for i,b in enumerate(m.BOARDS,1)])
                 calls.append(args); return ''
             def save(*args,**kwargs):
                 payload=json.loads(kwargs['input']); writes.append(payload)
