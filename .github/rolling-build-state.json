@@ -645,38 +645,46 @@
       "kernel_version": "6.18.57"
     },
     "2026.10.26-0027-rolling": {
-      "boards": {
-        "radxa-e52c": {
-          "dispatched": true,
-          "run_id": 40274639600,
-          "status": "completed",
-          "conclusion": "success",
-          "run_attempt": 1
-        },
-        "rock-5b": {
-          "dispatched": true,
-          "run_id": 40274643629,
-          "status": "completed",
-          "conclusion": "success",
-          "run_attempt": 1
-        },
-        "raspberry-pi-5": {
-          "dispatched": true,
-          "run_id": 40274647326,
-          "status": "completed",
-          "conclusion": "success",
-          "run_attempt": 1
-        },
-        "orangepi5-plus": {
-          "dispatched": true,
-          "run_id": 40274651287,
-          "status": "completed",
-          "conclusion": "success",
-          "run_attempt": 1
+      "boards": {},
+      "vyos_commit": "9ea90bfdbf70f3f07b5bd0ff04784821d36c199c",
+      "kernel_version": "6.18.59",
+      "history": [
+        {
+          "boards": {
+            "radxa-e52c": {
+              "dispatched": true,
+              "run_id": 40274639600,
+              "status": "completed",
+              "conclusion": "success",
+              "run_attempt": 1
+            },
+            "rock-5b": {
+              "dispatched": true,
+              "run_id": 40274643629,
+              "status": "completed",
+              "conclusion": "success",
+              "run_attempt": 1
+            },
+            "raspberry-pi-5": {
+              "dispatched": true,
+              "run_id": 40274647326,
+              "status": "completed",
+              "conclusion": "success",
+              "run_attempt": 1
+            },
+            "orangepi5-plus": {
+              "dispatched": true,
+              "run_id": 40274651287,
+              "status": "completed",
+              "conclusion": "success",
+              "run_attempt": 1
+            }
+          },
+          "vyos_commit": "c77134868b9334b2f5976223fe1d0c3d8ce91154",
+          "kernel_version": "6.18.57"
         }
-      },
-      "vyos_commit": "c77134868b9334b2f5976223fe1d0c3d8ce91154",
-      "kernel_version": "6.18.57"
+      ],
+      "kernel_refresh_at": "2026-10-26T21:59:22.862641+00:00"
     }
   }
 }
