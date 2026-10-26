@@ -651,6 +651,9 @@
         },
         "rock-5b": {
           "dispatched": true
+        },
+        "raspberry-pi-5": {
+          "dispatched": true
         }
       },
       "vyos_commit": "c77134868b9334b2f5976223fe1d0c3d8ce91154",
