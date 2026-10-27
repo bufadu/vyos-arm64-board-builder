@@ -647,7 +647,11 @@
     "2026.10.26-0027-rolling": {
       "boards": {
         "radxa-e52c": {
-          "dispatched": true
+          "dispatched": true,
+          "run_id": 40408893710,
+          "status": "completed",
+          "conclusion": "failure",
+          "run_attempt": 1
         },
         "rock-5b": {
           "dispatched": true
