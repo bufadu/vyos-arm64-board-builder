@@ -787,8 +787,13 @@ armbian_uboot_grub_enabled() {
 
 if armbian_uboot_grub_enabled; then
     HW_SERIALCON="${HW_SERIALCON:-ttyS2}"
+    # Boards listed in profiles/display-console.conf boot with HDMI primary.
+    GRUB_PRIMARY_CONSOLE=serial
+    if grep -qx "$BOARD" "$ROOT/profiles/display-console.conf"; then
+        GRUB_PRIMARY_CONSOLE=display
+    fi
     python3 "$ROOT/tools/patch-board-console.py" "$SQUASH_ROOT"
-    python3 "$ROOT/tools/patch-vyos-grub-display-console.py" \
+    python3 "$ROOT/tools/patch-vyos-grub-display-console.py" --primary "$GRUB_PRIMARY_CONSOLE" \
         "$SQUASH_ROOT/usr/share/vyos/templates/grub/grub_vyos_version.j2"
     install -m 0755 "$ROOT/tools/configure-board-console.py" "$SQUASH_ROOT/tmp/board-console.py"
     while IFS= read -r -d '' CONFIG_FILE; do
@@ -885,7 +890,7 @@ print(f"GRUB devicetree: /boot/{version}/dtb/{dtb}")
 PY
 
 if armbian_uboot_grub_enabled; then
-    python3 "$ROOT/tools/patch-vyos-grub-display-console.py" "$GRUB_VERSION_CFG"
+    python3 "$ROOT/tools/patch-vyos-grub-display-console.py" --primary "$GRUB_PRIMARY_CONSOLE" "$GRUB_VERSION_CFG"
 fi
 
 if native_extlinux_enabled || armbian_uboot_grub_enabled; then
