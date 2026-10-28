@@ -159,6 +159,10 @@ if [[ -f "$ROOT/profiles/board-network/$BOARD.env" ]]; then
     install -m 0644 "$ROOT/profiles/board-network/$BOARD.env" "$PROFILE_DIR/board-network.env"
 fi
 
+install -m 0755 "$PAYLOAD/vyos-arm64-stable-mac.sh" "$SBIN_DIR/vyos-arm64-stable-mac.sh"
+install -d -m 0755 "$ROOTFS/etc/udev/rules.d"
+install -m 0644 "$PAYLOAD/64-vyos-arm64-stable-mac.rules" "$ROOTFS/etc/udev/rules.d/64-vyos-arm64-stable-mac.rules"
+
 for script in \
     ap-dhcp-wan-setup.sh \
     dhcp-wan-ssh-setup.sh \

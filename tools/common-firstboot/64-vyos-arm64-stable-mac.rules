@@ -1,0 +1,3 @@
+# NICs without a factory MAC get a random one at every boot (addr_assign_type 1),
+# which breaks VyOS hw-id naming. Pin it before 65-vyos-net.rules runs.
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="eth*|e*", ATTR{addr_assign_type}=="1", DRIVERS=="?*", PROGRAM="/usr/local/sbin/vyos-arm64-stable-mac.sh %k"
