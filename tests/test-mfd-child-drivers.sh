@@ -72,5 +72,37 @@ fi
 
 echo "PASS: no unresolved MFD children"
 
+#
+# I2C RK809 (NanoPi R3S LTS): the variant comes from the compatible's
+# of_device_id data and shares a stacked case label with RK817.
+#
+cat > "$TMP/driver-map-i2c.tsv" <<'EOF'
+rockchip,rk809	CONFIG_MFD_RK8XX_I2C	drivers/mfd/rk8xx-i2c.c
+EOF
+
+"$ROOT/tools/mfd-child-drivers.py" \
+    --kernel "$KERNEL" \
+    --driver-map "$TMP/driver-map-i2c.tsv" \
+    --output "$TMP/mfd-map-i2c.tsv"
+
+if ! awk -F '\t' \
+    '$2 == "CONFIG_REGULATOR_RK808" && $4 == "RK809_ID" { found=1 } END { exit !found }' \
+    "$TMP/mfd-map-i2c.tsv"
+then
+    echo "FAIL: RK809 regulator child was not resolved"
+    cat "$TMP/mfd-map-i2c.tsv"
+    exit 1
+fi
+
+echo "PASS: RK809_ID regulator child selected"
+
+if grep -q 'PINCTRL_RK805' "$TMP/mfd-map-i2c.tsv"; then
+    echo "FAIL: RK805/RK806-only child leaked into RK809 result"
+    cat "$TMP/mfd-map-i2c.tsv"
+    exit 1
+fi
+
+echo "PASS: no unrelated RK806 children"
+
 echo
 echo "All MFD child-driver tests passed."

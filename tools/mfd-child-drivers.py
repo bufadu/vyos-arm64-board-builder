@@ -47,7 +47,7 @@ MFD_ADD_RE = re.compile(
 
 
 def read_active_mfd_sources(driver_map):
-    result = set()
+    result = defaultdict(set)
 
     with open(driver_map, encoding="utf-8") as f:
         for line in f:
@@ -59,7 +59,7 @@ def read_active_mfd_sources(driver_map):
             source = parts[2].strip()
 
             if source.startswith("drivers/mfd/"):
-                result.add(source)
+                result[source].add(parts[0].strip())
 
     return result
 
@@ -199,7 +199,7 @@ def direct_active_arrays(text, arrays):
     return active
 
 
-def variants_from_active_source(text):
+def variants_from_active_source(text, compatibles):
     result = set()
 
     for match in PROBE_CALL_RE.finditer(text):
@@ -208,6 +208,38 @@ def variants_from_active_source(text):
 
         for variant in VARIANT_RE.findall(arguments):
             result.add((function, variant))
+
+    # Bus glue such as rk8xx-i2c passes data->variant, chosen by the
+    # active compatible's of_device_id .data structure.
+    for compatible in compatibles:
+        match_entry = re.search(
+            r'\.compatible\s*=\s*"'
+            + re.escape(compatible)
+            + r'"\s*,\s*\.data\s*=\s*&\s*([A-Za-z0-9_]+)',
+            text,
+        )
+
+        if not match_entry:
+            continue
+
+        data = re.search(
+            r'\b'
+            + re.escape(match_entry.group(1))
+            + r'\s*=\s*\{(.*?)\};',
+            text,
+            re.S,
+        )
+
+        if not data:
+            continue
+
+        variant = re.search(
+            r'\.variant\s*=\s*([A-Z][A-Z0-9_]*_ID)\b',
+            data.group(1),
+        )
+
+        if variant:
+            result.add(("of_match_data", variant.group(1)))
 
     return result
 
@@ -218,7 +250,7 @@ def arrays_for_variant(mfd_sources, variant):
     case_re = re.compile(
         r'\bcase\s+'
         + re.escape(variant)
-        + r'\s*:(.*?)'
+        + r'\s*:(?:\s*case\s+[A-Za-z0-9_]+\s*:)*(.*?)'
           r'(?=\n\s*(?:case\b|default\s*:|\}))',
         re.S,
     )
@@ -324,7 +356,8 @@ def main():
 
         # Variant-specific handoff to an MFD core.
         for function, variant in variants_from_active_source(
-            text
+            text,
+            active_sources[parent_source],
         ):
             for core_source, array_name, children in (
                 arrays_for_variant(
