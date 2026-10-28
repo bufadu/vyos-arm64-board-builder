@@ -1,0 +1,9 @@
+# 99-default.link without MACAddressPolicy=persistent, for NICs whose address
+# 64-vyos-arm64-stable-mac.rules already pinned (it sets this property).
+[Match]
+Property=VYOS_ARM64_STABLE_MAC=1
+
+[Link]
+NamePolicy=keep kernel database onboard slot path
+AlternativeNamesPolicy=database onboard slot path
+MACAddressPolicy=none

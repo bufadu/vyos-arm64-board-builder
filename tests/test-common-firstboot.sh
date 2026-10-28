@@ -57,10 +57,10 @@ test -f "$ROOTFS/etc/systemd/system/vyos-modem-restore.service"
 test -L "$ROOTFS/etc/systemd/system/multi-user.target.wants/vyos-modem-restore.service"
 test -x "$ROOTFS/usr/local/sbin/vyos-arm64-dhcp-wan-firstboot-wrapper.sh"
 test -x "$ROOTFS/usr/local/sbin/vyos-arm64-grow-persistence.sh"
-test -x "$ROOTFS/usr/local/sbin/vyos-arm64-stable-mac.sh"
-grep -Fq 'PROGRAM="/usr/local/sbin/vyos-arm64-stable-mac.sh %k"' "$ROOTFS/etc/udev/rules.d/64-vyos-arm64-stable-mac.rules"
-grep -Fxq 'MACAddressPolicy=none' "$ROOTFS/etc/systemd/network/99-default.link.d/vyos-arm64-stable-mac.conf"
 test ! -e "$ROOTFS/usr/share/vyos-arm64-board-builder/board-network.env"
+test ! -e "$ROOTFS/usr/local/sbin/vyos-arm64-stable-mac.sh"
+test ! -e "$ROOTFS/etc/udev/rules.d/64-vyos-arm64-stable-mac.rules"
+test ! -e "$ROOTFS/etc/systemd/network/64-vyos-arm64-stable-mac.link"
 test ! -e "$ROOTFS/usr/local/sbin/vyos-arm64-tailscale-readiness"
 test ! -e "$ROOTFS/usr/local/sbin/tailscale"
 test ! -e "$ROOTFS/usr/local/sbin/vyos-arm64-kvm-readiness"
@@ -271,3 +271,15 @@ assert p['features']['print_server_e'] is True
 PY_E
 done
 echo 'PASS: print-only and combined print profile finalization'
+
+# Boards whose network profile opts in get the stable-MAC rule and link file.
+R3S_ROOTFS="$WORK/rootfs-r3s"
+mkdir -p "$R3S_ROOTFS"
+seed_timezone "$R3S_ROOTFS"
+bash "$ROOT/tools/finalize-vyos-rootfs.sh" nanopi-r3s-lts "$R3S_ROOTFS" no no base
+grep -qx 'STABLE_MAC=yes' "$R3S_ROOTFS/usr/share/vyos-arm64-board-builder/board-network.env"
+test -x "$R3S_ROOTFS/usr/local/sbin/vyos-arm64-stable-mac.sh"
+grep -Fq 'ENV{VYOS_ARM64_STABLE_MAC}="1"' "$R3S_ROOTFS/etc/udev/rules.d/64-vyos-arm64-stable-mac.rules"
+grep -Fxq 'Property=VYOS_ARM64_STABLE_MAC=1' "$R3S_ROOTFS/etc/systemd/network/64-vyos-arm64-stable-mac.link"
+grep -Fxq 'MACAddressPolicy=none' "$R3S_ROOTFS/etc/systemd/network/64-vyos-arm64-stable-mac.link"
+echo 'PASS: opt-in stable MAC finalization'
