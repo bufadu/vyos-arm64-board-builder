@@ -153,6 +153,12 @@ fi
 MULTI_USER_WANTS_DIR="$UNIT_DIR/multi-user.target.wants"
 install -d -m 0755 "$MULTI_USER_WANTS_DIR"
 
+# Optional first-boot WAN/LAN roles for boards whose ports differ by bus.
+rm -f "$PROFILE_DIR/board-network.env"
+if [[ -f "$ROOT/profiles/board-network/$BOARD.env" ]]; then
+    install -m 0644 "$ROOT/profiles/board-network/$BOARD.env" "$PROFILE_DIR/board-network.env"
+fi
+
 for script in \
     ap-dhcp-wan-setup.sh \
     dhcp-wan-ssh-setup.sh \
