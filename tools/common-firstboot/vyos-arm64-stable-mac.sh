@@ -9,7 +9,10 @@ SERIAL="$(cat /sys/class/dmi/id/product_serial 2>/dev/null || true)"
 if [ -z "$SERIAL" ]; then
     SERIAL="$(tr -d '\000' < /proc/device-tree/serial-number 2>/dev/null || true)"
 fi
-# Without a board serial, keep the kernel address rather than invent one.
+# Without a board serial, fall back to the machine-id like systemd would.
+if [ -z "$SERIAL" ]; then
+    SERIAL="$(cat /etc/machine-id 2>/dev/null || true)"
+fi
 [ -n "$SERIAL" ] || exit 0
 
 DEVICE="$(basename "$(readlink -f "/sys/class/net/$IFACE/device")")"

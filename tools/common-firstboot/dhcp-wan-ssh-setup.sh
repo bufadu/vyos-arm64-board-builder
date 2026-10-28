@@ -146,11 +146,14 @@ if [ -n "$LAN_IF" ]; then
 else
     setup_set interfaces ethernet "$WIRED_IF" description 'WAN-LAN-DHCP'
 fi
+# Pin the name to the address so VyOS keeps it across reboots.
+setup_set interfaces ethernet "$WIRED_IF" hw-id "$MAC"
 setup_set interfaces ethernet "$WIRED_IF" address 'dhcp'
 setup_set interfaces ethernet "$WIRED_IF" dhcp-options default-route-distance "$ROUTE_DISTANCE"
 
 if [ -n "$LAN_IF" ]; then
     setup_set interfaces ethernet "$LAN_IF" description 'LAN'
+    setup_set interfaces ethernet "$LAN_IF" hw-id "$(read_mac "$LAN_IF")"
     setup_set interfaces ethernet "$LAN_IF" address "$LAN_ADDRESS"
 
     setup_set service dhcp-server shared-network-name LAN authoritative

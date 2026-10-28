@@ -162,6 +162,8 @@ fi
 install -m 0755 "$PAYLOAD/vyos-arm64-stable-mac.sh" "$SBIN_DIR/vyos-arm64-stable-mac.sh"
 install -d -m 0755 "$ROOTFS/etc/udev/rules.d"
 install -m 0644 "$PAYLOAD/64-vyos-arm64-stable-mac.rules" "$ROOTFS/etc/udev/rules.d/64-vyos-arm64-stable-mac.rules"
+install -d -m 0755 "$ROOTFS/etc/systemd/network/99-default.link.d"
+install -m 0644 "$PAYLOAD/vyos-arm64-stable-mac.link.conf" "$ROOTFS/etc/systemd/network/99-default.link.d/vyos-arm64-stable-mac.conf"
 
 for script in \
     ap-dhcp-wan-setup.sh \
