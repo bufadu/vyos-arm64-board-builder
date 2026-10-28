@@ -779,6 +779,27 @@ if [[ "$FIRMWARE_PROVIDER" == edk2-rk3588 && ( "$BOARD" == rock-5b || "$BOARD" =
     rm -f "$SQUASH_ROOT/tmp/board-console.py" "$SQUASH_ROOT/tmp/board-initial.boot"
 fi
 
+# Armbian U-Boot boards booted through GRUB have no EFI framebuffer: the
+# kernel console follows the UART, with console=tty0 kept for HDMI.
+armbian_uboot_grub_enabled() {
+    [[ "$FIRMWARE_PROVIDER" == armbian-uboot ]] && ! native_extlinux_enabled
+}
+
+if armbian_uboot_grub_enabled; then
+    HW_SERIALCON="${HW_SERIALCON:-ttyS2}"
+    python3 "$ROOT/tools/patch-board-console.py" "$SQUASH_ROOT"
+    python3 "$ROOT/tools/patch-vyos-grub-display-console.py" \
+        "$SQUASH_ROOT/usr/share/vyos/templates/grub/grub_vyos_version.j2"
+    install -m 0755 "$ROOT/tools/configure-board-console.py" "$SQUASH_ROOT/tmp/board-console.py"
+    while IFS= read -r -d '' CONFIG_FILE; do
+        cp "$CONFIG_FILE" "$SQUASH_ROOT/tmp/board-initial.boot"
+        chroot "$SQUASH_ROOT" python3 /tmp/board-console.py "$HW_SERIALCON" 1500000 /tmp/board-initial.boot
+        cp "$SQUASH_ROOT/tmp/board-initial.boot" "$CONFIG_FILE"
+    done < <(find "$VERSION_DIR/rw" -type f -name config.boot -print0)
+    chroot "$SQUASH_ROOT" python3 /tmp/board-console.py "$HW_SERIALCON" 1500000 /usr/share/vyos/config.boot.default
+    rm -f "$SQUASH_ROOT/tmp/board-console.py" "$SQUASH_ROOT/tmp/board-initial.boot"
+fi
+
 if [[ "$FIRMWARE_PROVIDER" == raspberrypi-native ]]; then
     python3 - "$VERSION_DIR/board-boot.json" "$BOARD" "$BOOT_FDT_FILE" "$BUILD_PROFILE" <<'PYPI'
 import json, sys
@@ -863,7 +884,11 @@ cfg.write_text(text)
 print(f"GRUB devicetree: /boot/{version}/dtb/{dtb}")
 PY
 
-if native_extlinux_enabled; then
+if armbian_uboot_grub_enabled; then
+    python3 "$ROOT/tools/patch-vyos-grub-display-console.py" "$GRUB_VERSION_CFG"
+fi
+
+if native_extlinux_enabled || armbian_uboot_grub_enabled; then
     python3 - "$DST_MNT/boot/grub/grub.cfg.d/20-vyos-defaults-autoload.cfg" "$HW_SERIALCON" <<'PYCONSOLE'
 from pathlib import Path
 import re, sys
@@ -892,7 +917,7 @@ fi
 echo
 echo "===== SELECTING GRAPHICAL VYOS CONSOLE ====="
 
-if ! native_extlinux_enabled; then
+if ! native_extlinux_enabled && ! armbian_uboot_grub_enabled; then
     python3 "$GRUB_CONSOLE_TOOL" "$DST_MNT/boot/grub" --console-type tty
 fi
 
