@@ -22,4 +22,7 @@ board_hardware_select() {
         BOARD_BASE_MODULES="profiles/base-hardware/orangepi5-plus-modules.txt"
         BOARD_PERIPHERAL_PATCHES="profiles/base-hardware/kernel-patches/orangepi5-plus"
     fi
+    if [[ "$board" == nanopi-r3s-lts ]]; then
+        BOARD_PERIPHERAL_PATCHES="profiles/base-hardware/kernel-patches/nanopi-r3s-lts"
+    fi
 }
