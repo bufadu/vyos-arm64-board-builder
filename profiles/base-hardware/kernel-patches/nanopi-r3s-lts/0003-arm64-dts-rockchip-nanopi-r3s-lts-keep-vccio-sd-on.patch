@@ -1,0 +1,27 @@
+From: bufadu <1352301+bufadu@users.noreply.github.com>
+Subject: [PATCH] arm64: dts: rockchip: nanopi-r3s-lts: keep vccio_sd on
+
+dw_mmc disables vqmmc when the SD card is powered off at shutdown. The RK809
+LDO is not reset by a warm reboot, so the SD I/O domain stays unpowered and
+the factory eMMC SPL falls back to the eMMC system.
+---
+diff --git a/arch/arm64/boot/dts/rockchip/rk3566-nanopi-r3s-lts.dts b/arch/arm64/boot/dts/rockchip/rk3566-nanopi-r3s-lts.dts
+--- a/arch/arm64/boot/dts/rockchip/rk3566-nanopi-r3s-lts.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3566-nanopi-r3s-lts.dts
+@@ -60,6 +60,16 @@
+ 	/delete-property/ sd-uhs-sdr50;
+ };
+ 
++/*
++ * Linux turns vqmmc off when it powers the card down at shutdown. The RK809
++ * keeps that state across a warm reset, so the SD I/O domain is unpowered
++ * when the eMMC SPL probes the card and it fails "voltage select". Keep it on.
++ */
++&vccio_sd {
++	regulator-always-on;
++	regulator-boot-on;
++};
++
+ &vp0 {
+ 	vp0_out_hdmi: endpoint@ROCKCHIP_VOP2_EP_HDMI0 {
+ 		reg = <ROCKCHIP_VOP2_EP_HDMI0>;

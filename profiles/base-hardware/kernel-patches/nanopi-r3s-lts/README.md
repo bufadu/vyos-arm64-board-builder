@@ -14,3 +14,9 @@ so FriendlyElec's eMMC SPL fails "Card did not respond to voltage select" on
 the SD card and boots the factory eMMC system. `no-1-8-v` would not help: only
 sdhci parses it, and sdmmc0 is dw_mmc. Cost: SD high speed (~25 MB/s) instead
 of SDR50.
+
+`0003` keeps `vccio_sd` (RK809 LDO5, the SD card's vqmmc) always on. At
+shutdown dw_mmc powers the card down and disables vqmmc; the RK809 is not
+reset by a warm reboot, so the SD I/O domain stays unpowered and the eMMC SPL
+still fails "voltage select" even with the card at 3.3 V. `vcc3v3_sd` (vmmc)
+is already always on upstream.
